@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Bo's Beauty</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body class="admin-body">
+    
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h1>🛡️ Panel Administrativo</h1>
+            <p>Bo's Beauty - Gestión de Productos</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="adminEmail">Email</label>
+                    <input type="email" id="adminEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Contraseña</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="submit" class="login-button">Iniciar Sesión</button>
+            </form>
+            <p class="demo-credentials">
+                <small><strong>Demo:</strong> admin@bosbeauty.com / admin123</small>
+            </p>
+            <a href="{{ url_for('serve_index') }}" class="back-link">← Volver a la tienda</a>
+        </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <h1>🌿 Bo's Beauty - Panel Admin</h1>
+                <div class="admin-header-actions">
+                    <span class="admin-user" id="adminUser"></span>
+                    <button class="logout-button" id="logoutButton">Cerrar Sesión</button>
+                    <a href="{{ url_for('serve_index') }}" class="back-to-store">← Volver a la Tienda</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Productos</span>
+                        <span class="stat-value" id="totalProducts">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏷️</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Categorías</span>
+                        <span class="stat-value">6</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Stock Bajo</span>
+                        <span class="stat-value" id="lowStock">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Destacados</span>
+                        <span class="stat-value" id="featuredCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-bar">
+                <button class="action-button primary" id="addProductButton">
+                    + Agregar Producto
+                </button>
+                <button class="action-button" id="importProductsButton">
+                    📥 Importar Productos de Tienda
+                </button>
+                <button class="action-button" id="refreshButton">
+                    🔄 Actualizar
+                </button>
+            </div>
+
+            <div class="products-table-wrapper">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Destacado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr>
+                            <td colspan="7" class="loading-row">Cargando productos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Producto</h2>
+                <button class="modal-close" id="closeModal">✕</button>
+            </div>
+            <form id="productForm" enctype="multipart/form-data">
+                <input type="hidden" id="productId">
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="productName">Nombre del Producto *</label>
+                        <input type="text" id="productName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productPrice">Precio ($) *</label>
+                        <input type="number" id="productPrice" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productCategory">Categoría *</label>
+                        <select id="productCategory" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="jabones">Jabones</option>
+                            <option value="serums">Serums</option>
+                            <option value="shampoos">Shampoos</option>
+                            <option value="acondicionadores">Acondicionadores</option>
+                            <option value="cremas">Cremas</option>
+                            <option value="aceites">Aceites</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productStock">Stock *</label>
+                        <input type="number" id="productStock" min="0" value="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="productFeatured">
+                            Producto Destacado
+                        </label>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="productDescription">Descripción</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="productIngredients">Ingredientes (separados por coma)</label>
+                        <textarea id="productIngredients" rows="2" placeholder="Ej: Aceite de oliva, Aceite de coco, Lavanda"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="productImage">Imagen del Producto</label>
+                        <input type="file" id="productImage" accept="image/*">
+                        <small>O ingresa una URL:</small>
+                        <input type="url" id="productImageUrl" placeholder="https://ejemplo.com/imagen.jpg">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="image-preview" id="imagePreview">
+                            <img id="previewImg" src="" alt="Vista previa" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="cancel-button" id="cancelButton">Cancelar</button>
+                    <button type="submit" class="save-button">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>Confirmar Eliminación</h2>
+                <button class="modal-close" id="closeDeleteModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p class="delete-product-name" id="deleteProductName"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-button" id="cancelDelete">Cancelar</button>
+                <button type="button" class="delete-button" id="confirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>
