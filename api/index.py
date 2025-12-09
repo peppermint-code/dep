@@ -1,8 +1,5 @@
-# api/index.py
+from flask_app import app  # importa tu Flask app principal
 
-# Importa TU app Flask completa
-from flask_app import app
-
-# Exporta el handler WSGI que Vercel necesita
+# handler WSGI para Vercel
 def handler(environ, start_response):
-    return app.wsgi_app(environ, start_response)
+    return app(environ, start_response)
